@@ -146,7 +146,6 @@ class _GameScreenState extends State<GameScreen> {
           'GameOver': (context, Game game) => Center(
             child: ElevatedButton(
               onPressed: () {
-                // Navigator.of(context).pop(game.score);
                 Navigator.of(context).pop();
               },
               child: const Text('Volver'),
@@ -183,17 +182,17 @@ class CotopaxiGame extends FlameGame
 
   void Function(int score)? onGameOver;
 
-  final double _startDragY = 0;
+  double _startDragY = 0;
   bool isSliding = false;
 
   @override
-  Color backgroundColor() => const Color(0xFFB3E5FC); // cielo
+  Color backgroundColor() => const Color(0xFFB3E5FC); // sky
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Precarga todas las imágenes que vas a usar
+    // Preload all images that will be used
     await images.loadAll([
       'sprites/dash_run.png',
       'sprites/dash_jump.png',
@@ -205,8 +204,8 @@ class CotopaxiGame extends FlameGame
       'sprites/rosa.png',
     ]);
 
-    // Fondo "parallax" simple con capas geométricas
-    // Cargar fondo Parallax
+    // Simple "parallax" background with geometric layers
+    // Load Parallax background
     parallax = await ParallaxComponent.load(
       [
         ParallaxImageData("parallax/bg_0_sky.png"),
@@ -230,9 +229,9 @@ class CotopaxiGame extends FlameGame
     hud = Hud(game: this);
     add(hud);
 
-    spawner = SpawnManager(onSpawn: add);
+    spawner = SpawnManager(onSpawn: (component) => add(component));
+    add(spawner);
 
-    // overlays.add('Countdown');
     startCountdown();
   }
 
@@ -251,13 +250,12 @@ class CotopaxiGame extends FlameGame
     elapsed += dt;
     hud.timeLeft = max(0, runDuration - elapsed);
 
-    // Dificultad progresiva
+    // Progressive difficulty
     spawner.interval = (1.2 - (elapsed ~/ 10) * 0.15).clamp(0.55, 1.2);
-    spawner.update(dt, this);
+    spawner.update(dt);
 
     if (hud.timeLeft <= 0 || lives <= 0) {
       state = PlayState.gameOver;
-      // overlays.add('GameOver');
       onGameOver?.call(score);
     }
   }
@@ -274,30 +272,30 @@ class CotopaxiGame extends FlameGame
     player.jump(stronger: true);
   }
 
-  // @override
-  // void onPanStart(DragStartInfo info) {
-  //   // Guardamos el punto inicial del gesto
-  //   _startDragY = info.eventPosition.global.y;
-  // }
+  @override
+  void onPanStart(DragStartInfo info) {
+    // Save the initial gesture point
+    _startDragY = info.eventPosition.global.y;
+  }
 
-  // @override
-  // void onPanUpdate(DragUpdateInfo info) {
-  //   final dy = info.eventPosition.global.y - _startDragY;
+  @override
+  void onPanUpdate(DragUpdateInfo info) {
+    final dy = info.eventPosition.global.y - _startDragY;
 
-  //   // Si el desplazamiento vertical hacia abajo es grande
-  //   if (dy > 40 && !isSliding) {
-  //     isSliding = true;
-  //     player.slide(true);
-  //   }
-  // }
+    // If the vertical downward displacement is large
+    if (dy > 40 && !isSliding) {
+      isSliding = true;
+      player.slide(true);
+    }
+  }
 
-  // @override
-  // void onPanEnd(DragEndInfo info) {
-  //   if (isSliding) {
-  //     isSliding = false;
-  //     player.slide(false);
-  //   }
-  // }
+  @override
+  void onPanEnd(DragEndInfo info) {
+    if (isSliding) {
+      isSliding = false;
+      player.slide(false);
+    }
+  }
 
   void addScore(int s) {
     score += s * (1 + (combo ~/ 5)).clamp(1, 5);
@@ -334,6 +332,7 @@ class Ground extends PositionComponent with HasGameReference<CotopaxiGame> {
 class Player extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameReference<CotopaxiGame> {
   final Vector2 velocity = Vector2.zero();
+  bool isOnGround = true;
 
   late SpriteAnimationData _runData;
   late SpriteAnimationData _jumpData;
@@ -345,12 +344,12 @@ class Player extends SpriteAnimationComponent
     final imgJump = game.images.fromCache('sprites/dash_jump.png');
     final imgSlide = game.images.fromCache('sprites/dash_slide.png');
 
-    // Calcula tamaño de frame por columnas
-    // define columnas y filas reales de la hoja
+    // Calculate frame size by columns
+    // define real columns and rows of the sheet
     const cols = 4;
     const rows = 2;
 
-    // tamaño de cada frame
+    // size of each frame
     final frameW = imgRun.width / cols;
     final frameH = imgRun.height / rows;
 
@@ -361,7 +360,7 @@ class Player extends SpriteAnimationComponent
 
     final sheet = SpriteSheet(image: imgRun, srcSize: Vector2(frameW, frameH));
 
-    // construir la lista de 8 sprites recorriendo filas y columnas
+    // build the list of 8 sprites by traversing rows and columns
     final frames = <Sprite>[];
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
@@ -369,11 +368,11 @@ class Player extends SpriteAnimationComponent
       }
     }
 
-    // _runData = SpriteAnimationData.sequenced(
-    //   amount: 8,
-    //   stepTime: 0.08,
-    //   textureSize: Vector2(runW, runH),
-    // );
+    _runData = SpriteAnimationData.sequenced(
+      amount: 8,
+      stepTime: 0.08,
+      textureSize: Vector2(frameW, frameH),
+    );
     _jumpData = SpriteAnimationData.sequenced(
       amount: 4,
       stepTime: 0.10,
@@ -386,16 +385,45 @@ class Player extends SpriteAnimationComponent
       textureSize: Vector2(slideW, slideH),
     );
 
-    // asignar animación
+    // assign animation
     animation = SpriteAnimation.spriteList(frames, stepTime: 0.08);
 
     size = Vector2(96, 96);
     anchor = Anchor.center;
+
+    // Add hitbox for collisions
+    add(RectangleHitbox()..collisionType = CollisionType.active);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    // Apply gravity
+    velocity.y += game.gravity * dt;
+    position += velocity * dt;
+
+    // Check if on ground
+    final groundY = game.size.y - game.ground.height - height / 2;
+    if (y >= groundY) {
+      y = groundY;
+      velocity.y = 0;
+      isOnGround = true;
+
+      // Return to running animation if not sliding
+      if (animation != null) {
+        animation = SpriteAnimation.fromFrameData(
+          game.images.fromCache('sprites/dash_run.png'),
+          _runData,
+        );
+      }
+    } else {
+      isOnGround = false;
+    }
   }
 
   void jump({bool stronger = false}) {
-    final onGround = (y >= game.size.y - game.ground.height - height - 8 - 0.5);
-    if (onGround) {
+    if (isOnGround) {
       velocity.y = stronger ? -720 : -620;
       animation = SpriteAnimation.fromFrameData(
         game.images.fromCache('sprites/dash_jump.png'),
@@ -415,6 +443,22 @@ class Player extends SpriteAnimationComponent
         game.images.fromCache('sprites/dash_run.png'),
         _runData,
       );
+    }
+  }
+
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollision(intersectionPoints, other);
+    if (other is Obstacle) {
+      game.hit();
+      // Temporary invulnerability effect
+      opacity = 0.5;
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        opacity = 1.0;
+      });
+    } else if (other is Collectible) {
+      other.removeFromParent();
+      game.addScore(10);
     }
   }
 }
@@ -477,14 +521,16 @@ class Hud extends PositionComponent with HasGameReference<CotopaxiGame> {
   }
 }
 
-class SpawnManager {
+class SpawnManager extends Component with HasGameReference<CotopaxiGame> {
   final void Function(Component) onSpawn;
   final _rng = Random();
   double t = 0;
   double interval = 1.2;
+
   SpawnManager({required this.onSpawn});
 
-  void update(double dt, CotopaxiGame game) {
+  @override
+  void update(double dt) {
     t += dt;
     if (t >= interval) {
       t = 0;
@@ -535,7 +581,7 @@ class Obstacle extends SpriteComponent
       game.size.y - game.ground.height - o.height - 6,
     );
     o.speed = 320 + (game.elapsed * 8);
-    o.add(RectangleHitbox());
+    o.add(RectangleHitbox()..collisionType = CollisionType.passive);
     return o;
   }
 
@@ -569,7 +615,7 @@ class Collectible extends SpriteComponent
         game.size.y - game.ground.height - 120 - Random().nextInt(60),
       )
       ..speed = 320 + (game.elapsed * 8);
-    c.add(RectangleHitbox());
+    c.add(RectangleHitbox()..collisionType = CollisionType.passive);
     return c;
   }
 
