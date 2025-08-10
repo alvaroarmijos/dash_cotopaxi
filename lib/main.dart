@@ -182,8 +182,7 @@ class CotopaxiGame extends FlameGame
 
   void Function(int score)? onGameOver;
 
-  double _startDragY = 0;
-  bool isSliding = false;
+  // Gesture variables removed - sliding functionality disabled
 
   @override
   Color backgroundColor() => const Color(0xFFB3E5FC); // sky
@@ -196,7 +195,6 @@ class CotopaxiGame extends FlameGame
     await images.loadAll([
       'sprites/dash_run.png',
       'sprites/dash_jump.png',
-      'sprites/dash_slide.png',
       'sprites/llama.png',
       'sprites/roca.png',
       'sprites/charco.png',
@@ -204,8 +202,7 @@ class CotopaxiGame extends FlameGame
       'sprites/rosa.png',
     ]);
 
-    // Simple "parallax" background with geometric layers
-    // Load Parallax background
+    // Load Parallax background with seamless tiling
     parallax = await ParallaxComponent.load(
       [
         ParallaxImageData("parallax/bg_0_sky.png"),
@@ -213,14 +210,15 @@ class CotopaxiGame extends FlameGame
         ParallaxImageData("parallax/bg_2_cotopaxi.png"),
         ParallaxImageData("parallax/bg_3_fields.png"),
       ],
-      baseVelocity: Vector2(20, 0),
-      velocityMultiplierDelta: Vector2(1.4, 0),
+      baseVelocity: Vector2(30, 0),
+      velocityMultiplierDelta: Vector2(1.1, 0),
       repeat: ImageRepeat.repeatX,
+      filterQuality: FilterQuality.none,
     );
 
     add(parallax);
 
-    ground = Ground(height: 80);
+    ground = Ground(height: 120);
     add(ground);
 
     player = Player()..position = Vector2(120, size.y - ground.height - 96);
@@ -274,27 +272,17 @@ class CotopaxiGame extends FlameGame
 
   @override
   void onPanStart(DragStartInfo info) {
-    // Save the initial gesture point
-    _startDragY = info.eventPosition.global.y;
+    // Sliding functionality removed
   }
 
   @override
   void onPanUpdate(DragUpdateInfo info) {
-    final dy = info.eventPosition.global.y - _startDragY;
-
-    // If the vertical downward displacement is large
-    if (dy > 40 && !isSliding) {
-      isSliding = true;
-      player.slide(true);
-    }
+    // Sliding functionality removed
   }
 
   @override
   void onPanEnd(DragEndInfo info) {
-    if (isSliding) {
-      isSliding = false;
-      player.slide(false);
-    }
+    // Sliding functionality removed
   }
 
   void addScore(int s) {
@@ -336,13 +324,13 @@ class Player extends SpriteAnimationComponent
 
   late SpriteAnimationData _runData;
   late SpriteAnimationData _jumpData;
-  late SpriteAnimationData _slideData;
+  // _slideData removed - sliding functionality disabled
 
   @override
   Future<void> onLoad() async {
     final imgRun = game.images.fromCache('sprites/dash_run.png');
     final imgJump = game.images.fromCache('sprites/dash_jump.png');
-    final imgSlide = game.images.fromCache('sprites/dash_slide.png');
+    // imgSlide removed - sliding functionality disabled
 
     // Calculate frame size by columns
     // define real columns and rows of the sheet
@@ -355,8 +343,7 @@ class Player extends SpriteAnimationComponent
 
     final jumpW = imgJump.width / 4;
     final jumpH = imgJump.height.toDouble();
-    final slideW = imgSlide.width / 4;
-    final slideH = imgSlide.height.toDouble();
+    // slideW and slideH removed - sliding functionality disabled
 
     final sheet = SpriteSheet(image: imgRun, srcSize: Vector2(frameW, frameH));
 
@@ -379,11 +366,7 @@ class Player extends SpriteAnimationComponent
       textureSize: Vector2(jumpW, jumpH),
       loop: false,
     );
-    _slideData = SpriteAnimationData.sequenced(
-      amount: 4,
-      stepTime: 0.10,
-      textureSize: Vector2(slideW, slideH),
-    );
+    // _slideData initialization removed - sliding functionality disabled
 
     // assign animation
     animation = SpriteAnimation.spriteList(frames, stepTime: 0.08);
@@ -432,19 +415,7 @@ class Player extends SpriteAnimationComponent
     }
   }
 
-  void slide(bool on) {
-    if (on) {
-      animation = SpriteAnimation.fromFrameData(
-        game.images.fromCache('sprites/dash_slide.png'),
-        _slideData,
-      );
-    } else {
-      animation = SpriteAnimation.fromFrameData(
-        game.images.fromCache('sprites/dash_run.png'),
-        _runData,
-      );
-    }
-  }
+  // slide method removed - sliding functionality disabled
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
