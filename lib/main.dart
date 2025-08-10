@@ -322,24 +322,16 @@ class Player extends SpriteAnimationComponent
   final Vector2 velocity = Vector2.zero();
   bool isOnGround = true;
 
-  late SpriteAnimationData _runData;
   late SpriteAnimationData _jumpData;
-  // _slideData removed - sliding functionality disabled
 
   @override
   Future<void> onLoad() async {
     final imgRun = game.images.fromCache('sprites/dash_run.png');
     final imgJump = game.images.fromCache('sprites/dash_jump.png');
-    // imgSlide removed - sliding functionality disabled
-
-    // Calculate frame size by columns
-    // define real columns and rows of the sheet
-    const cols = 4;
-    const rows = 2;
 
     // size of each frame
-    final frameW = imgRun.width / cols;
-    final frameH = imgRun.height / rows;
+    final frameW = imgRun.width / 6;
+    final frameH = imgRun.height.toDouble();
 
     final jumpW = imgJump.width / 4;
     final jumpH = imgJump.height.toDouble();
@@ -347,29 +339,24 @@ class Player extends SpriteAnimationComponent
 
     final sheet = SpriteSheet(image: imgRun, srcSize: Vector2(frameW, frameH));
 
-    // build the list of 8 sprites by traversing rows and columns
-    final frames = <Sprite>[];
-    for (var r = 0; r < rows; r++) {
-      for (var c = 0; c < cols; c++) {
-        frames.add(sheet.getSprite(r, c));
-      }
-    }
-
-    _runData = SpriteAnimationData.sequenced(
-      amount: 8,
-      stepTime: 0.08,
-      textureSize: Vector2(frameW, frameH),
-    );
+    // Recorre filas y columnas para sacar los 8 frames
+    final frames = <Sprite>[
+      sheet.getSprite(0, 1),
+      sheet.getSprite(0, 1),
+      sheet.getSprite(0, 2),
+      sheet.getSprite(0, 3),
+      sheet.getSprite(0, 4),
+      sheet.getSprite(0, 5),
+    ];
     _jumpData = SpriteAnimationData.sequenced(
       amount: 4,
       stepTime: 0.10,
       textureSize: Vector2(jumpW, jumpH),
       loop: false,
     );
-    // _slideData initialization removed - sliding functionality disabled
 
     // assign animation
-    animation = SpriteAnimation.spriteList(frames, stepTime: 0.08);
+    animation = SpriteAnimation.spriteList(frames, stepTime: 0.4);
 
     size = Vector2(96, 96);
     anchor = Anchor.center;
@@ -392,14 +379,6 @@ class Player extends SpriteAnimationComponent
       y = groundY;
       velocity.y = 0;
       isOnGround = true;
-
-      // Return to running animation if not sliding
-      if (animation != null) {
-        animation = SpriteAnimation.fromFrameData(
-          game.images.fromCache('sprites/dash_run.png'),
-          _runData,
-        );
-      }
     } else {
       isOnGround = false;
     }
