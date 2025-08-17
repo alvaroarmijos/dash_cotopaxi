@@ -8,12 +8,21 @@ import 'game_config.dart';
 class GameUtils {
   static final Random _random = Random();
 
-  /// Calculate spawn interval based on elapsed time
+  /// Calculate spawn interval based on elapsed time with smooth difficulty curve
   static double calculateSpawnInterval(double elapsedTime) {
-    final difficultyLevel = (elapsedTime ~/ 10);
+    // Smooth exponential difficulty curve instead of step-based
+    final difficultyProgress = (elapsedTime / 60.0).clamp(
+      0.0,
+      1.0,
+    ); // Progress over 60 seconds
+    final easingFactor =
+        1.0 - pow(1.0 - difficultyProgress, 2.0); // Quadratic easing
+
     final newInterval =
         GameConfig.spawnInterval -
-        (difficultyLevel * GameConfig.difficultyIncrease);
+        (easingFactor *
+            (GameConfig.spawnInterval - GameConfig.minSpawnInterval));
+
     return newInterval.clamp(
       GameConfig.minSpawnInterval,
       GameConfig.spawnInterval,

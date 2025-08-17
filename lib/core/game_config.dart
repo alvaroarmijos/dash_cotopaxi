@@ -15,9 +15,12 @@ class GameConfig {
   static const double groundHeight = 120.0;
 
   // Spawn settings
-  static const double spawnInterval = 1.2; // seconds
-  static const double minSpawnInterval = 0.55; // seconds
-  static const double difficultyIncrease = 0.15; // seconds per 10s
+  static const double spawnInterval =
+      2.5; // seconds - Start slower for easier beginning
+  static const double minSpawnInterval =
+      0.8; // seconds - Minimum interval for maximum difficulty
+  static const double difficultyIncrease =
+      0.2; // seconds per 10s - More gradual progression
 
   // Scoring
   static const int itemScore = 10;
@@ -26,8 +29,9 @@ class GameConfig {
   static const int comboThreshold = 5;
 
   // Physics
-  static const double obstacleSpeed = 360.0;
-  static const double speedIncrease = 8.0; // px/s per second
+  static const double obstacleSpeed = 280.0; // Start slower
+  static const double speedIncrease =
+      4.0; // px/s per second - More gradual speed increase
 
   // UI
   static const double hudPadding = 16.0;

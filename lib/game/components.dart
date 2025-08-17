@@ -120,8 +120,19 @@ class SpawnManager extends Component with HasGameReference<CotopaxiGame> {
     t += dt;
     if (t >= interval) {
       t = 0;
+
+      // Dynamic obstacle probability based on game time
+      final elapsedTime = game.elapsed;
+      const baseObstacleProbability = 0.4; // Start with lower obstacle rate
+      const maxObstacleProbability = 0.75; // Maximum obstacle rate
+      final difficultyProgress = (elapsedTime / 60.0).clamp(0.0, 1.0);
+      final obstacleProbability =
+          baseObstacleProbability +
+          (difficultyProgress *
+              (maxObstacleProbability - baseObstacleProbability));
+
       final r = _rng.nextDouble();
-      if (r < 0.65) {
+      if (r < obstacleProbability) {
         onSpawn(Obstacle.random(game));
       } else {
         onSpawn(Collectible.random(game));

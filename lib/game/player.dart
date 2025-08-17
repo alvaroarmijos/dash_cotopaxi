@@ -41,9 +41,19 @@ class Player extends SpriteAnimationComponent
     size = Vector2(GameConfig.playerWidth, GameConfig.playerHeight);
     anchor = Anchor.center;
 
-    // Add hitBox for collisions (configurable visibility)
+    // Add custom hitBox for collisions (compensating for image padding)
+    // The actual dinosaur is smaller than the full sprite size and positioned more to the left
     add(
-      RectangleHitbox()
+      RectangleHitbox(
+          size: Vector2(
+            GameConfig.playerWidth * 0.3,
+            GameConfig.playerHeight * 0.7,
+          ), // Smaller hitbox
+          position: Vector2(
+            GameConfig.playerWidth * 0.1,
+            GameConfig.playerHeight * 0.1,
+          ), // Offset to match visual dino position
+        )
         ..collisionType = CollisionType.active
         ..renderShape = GameConfig.showHitBoxes,
     );

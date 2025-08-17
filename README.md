@@ -13,8 +13,9 @@ An endless runner game developed in Flutter + Flame where you control Dash runni
 - **Mechanics**:
   - Life system (3 hearts)
   - Combo multiplier (x1 to x5)
-  - Progressive difficulty every 10 seconds
+  - **Smooth progressive difficulty system** (see detailed explanation below)
   - Scoring for collected items and survival time
+  - Dynamic obstacle/collectible probability based on game time
 
 ## 🚀 Installation and Execution
 
@@ -49,17 +50,25 @@ An endless runner game developed in Flutter + Flame where you control Dash runni
 
 ```
 lib/
-├── main.dart                 # Entry point and main game logic
-├── core/                     # Configurations and utilities (future)
-├── game/                     # Game logic (future)
-├── ui/                       # User interfaces (future)
+├── main.dart                 # Entry point and app initialization
+├── core/                     # Core configurations and utilities
+│   ├── game_config.dart      # Game constants and settings
+│   ├── game_strings.dart     # Localized text strings
+│   ├── game_types.dart       # Type definitions and enums
+│   └── game_utils.dart       # Utility functions and calculations
+├── game/                     # Game logic and components
+│   ├── cotopaxi_game.dart    # Main game class
+│   ├── player.dart           # Player character (Dinosaur)
+│   └── components.dart       # Game objects (obstacles, collectibles, etc.)
+├── ui/                       # User interface screens
+│   ├── home_screen.dart      # Main menu
+│   └── game_screen.dart      # Game view wrapper
 └── assets/                   # Game resources
-    ├── images/
-    │   ├── sprites/          # Characters and objects
-    │   ├── parallax/         # Layered backgrounds
-    │   └── ui/               # Interface elements
-    ├── sfx/                  # Sound effects (future)
-    └── fonts/                # Typographies (future)
+    └── images/
+        ├── sprites/          # Characters and objects
+        │   └── anim/         # Animation spritesheets
+        ├── parallax/         # Layered backgrounds (Cotopaxi scenery)
+        └── ui/               # Interface elements
 ```
 
 ## 🎯 Main Components
@@ -69,16 +78,19 @@ lib/
 - Manages game state (idle, countdown, running, gameOver)
 - Coordinates all game systems
 
-### Player (Dash)
-- Main character controlled by the user
+### Player (Dinosaur)
+- Realistic dinosaur character controlled by the user
 - Physics system with gravity and collisions
-- Animations for running, jumping and sliding
-- Collision detection with obstacles and collectibles
+- High-quality animations: 8-frame running cycle, 12-frame jump sequence
+- Precise collision detection with optimized hitboxes
+- Smooth animation transitions between running and jumping states
 
 ### SpawnManager
-- Randomly generates obstacles and collectibles
-- Progressive difficulty based on elapsed time
-- Spawn frequency control
+- Dynamically generates obstacles and collectibles
+- **Smart difficulty progression**: Smooth exponential curve over 60 seconds
+- **Adaptive spawn rates**: Frequency decreases from 2.5s to 0.8s intervals
+- **Dynamic probability**: Obstacle ratio increases from 40% to 75% over time
+- Intelligent spawn timing to maintain optimal challenge level
 
 ### Obstacles & Collectibles
 - **Obstacles**: Llamas, rocks and puddles (lose lives)
@@ -94,9 +106,8 @@ lib/
 ## 🎨 Game Assets
 
 ### Sprites
-- `dash_run.png`: Running animation (8 frames)
-- `dash_jump.png`: Jump animation (4 frames)
-- `dash_slide.png`: Slide animation (4 frames)
+- `anim/dino_run.png`: Realistic dinosaur running animation (8 frames, 680x472px each)
+- `anim/dino_jump.png`: Realistic dinosaur jump animation (12 frames, 4 rows x 3 columns, 680x472px each)
 - `llama.png`, `roca.png`, `charco.png`: Obstacles
 - `cacao.png`, `rosa.png`: Collectibles
 
@@ -119,15 +130,90 @@ lib/
 
 ## 🔧 Customization
 
-### Difficulty
-- Base speed: 300 px/s
-- Increase: +15 px/s every 10 seconds
-- Spawn frequency: 1.2s → 0.55s
+### Difficulty System
+The game features a **smooth progressive difficulty curve** designed for optimal gameplay experience:
+
+#### Spawn Intervals
+- **Initial**: 2.5 seconds between spawns (relaxed start)
+- **Final**: 0.8 seconds between spawns (maximum intensity)
+- **Progression**: Smooth exponential curve over 60 seconds using quadratic easing
+
+#### Obstacle Speed
+- **Base speed**: 280 px/s (manageable start)
+- **Speed increase**: +4 px/s per second (gradual acceleration)
+- **Final speed**: ~520 px/s at 60 seconds
+
+#### Dynamic Obstacle Probability
+- **Initial**: 40% obstacles, 60% collectibles (learning phase)
+- **Final**: 75% obstacles, 25% collectibles (challenge phase)
+- **Progression**: Linear increase based on elapsed time
 
 ### Scoring
 - Cacao/Rose: +10 points
 - Survival time: +5 points/second
 - Combo multiplier: x1 to x5
+
+## 📊 Progressive Difficulty System
+
+### Overview
+The game implements a sophisticated difficulty system that provides a smooth learning curve, starting easy for new players and gradually increasing to maintain engagement throughout the 60-second gameplay session.
+
+### Technical Implementation
+
+#### 1. Spawn Interval Calculation
+```dart
+// Smooth exponential curve instead of step-based progression
+final difficultyProgress = (elapsedTime / 60.0).clamp(0.0, 1.0);
+final easingFactor = 1.0 - pow(1.0 - difficultyProgress, 2.0); // Quadratic easing
+
+final newInterval = GameConfig.spawnInterval - 
+    (easingFactor * (GameConfig.spawnInterval - GameConfig.minSpawnInterval));
+```
+
+#### 2. Dynamic Obstacle Probability
+```dart
+const baseObstacleProbability = 0.4;  // 40% at start
+const maxObstacleProbability = 0.75;  // 75% at end
+final difficultyProgress = (elapsedTime / 60.0).clamp(0.0, 1.0);
+final obstacleProbability = baseObstacleProbability + 
+    (difficultyProgress * (maxObstacleProbability - baseObstacleProbability));
+```
+
+#### 3. Speed Progression
+- **Linear increase**: `speed = baseSpeed + (elapsedTime * speedIncrease)`
+- Provides predictable acceleration that players can adapt to
+
+### Difficulty Timeline
+
+| Time | Spawn Interval | Obstacle % | Speed (px/s) | Player Experience |
+|------|----------------|------------|--------------|-------------------|
+| 0s   | 2.5s          | 40%        | 280          | Learning phase    |
+| 15s  | ~2.1s         | 49%        | 340          | Warming up        |
+| 30s  | ~1.5s         | 58%        | 400          | Getting challenging |
+| 45s  | ~1.0s         | 67%        | 460          | Intense gameplay  |
+| 60s  | 0.8s          | 75%        | 520          | Maximum difficulty |
+
+### Design Philosophy
+
+1. **Gentle Start**: New players aren't overwhelmed immediately
+2. **Smooth Progression**: No sudden difficulty spikes that feel unfair
+3. **Maintained Challenge**: Experienced players stay engaged throughout
+4. **Balanced Rewards**: More collectibles early help build score foundation
+5. **Visual Feedback**: Hitboxes precisely match sprite visuals for fair collisions
+
+### Configuration Constants
+Located in `lib/core/game_config.dart`:
+
+```dart
+// Spawn settings
+static const double spawnInterval = 2.5;      // Initial interval
+static const double minSpawnInterval = 0.8;   // Maximum difficulty interval
+static const double difficultyIncrease = 0.2; // Progression rate
+
+// Physics
+static const double obstacleSpeed = 280.0;     // Starting speed
+static const double speedIncrease = 4.0;      // Speed increment per second
+```
 
 ## 🐛 Troubleshooting
 
