@@ -11,48 +11,37 @@ class Player extends SpriteAnimationComponent
   final Vector2 velocity = Vector2.zero();
   bool isOnGround = true;
 
-  late SpriteAnimationData _jumpData;
+  late SpriteAnimation _runAnimation;
+  late SpriteAnimation _jumpAnimation;
 
   @override
   Future<void> onLoad() async {
-    final imgRun = game.images.fromCache('sprites/dash_run.png');
-    final imgJump = game.images.fromCache('sprites/dash_jump.png');
-
-    // Calculate frame size by columns
-    // define real columns and rows of the sheet
-    const cols = 6; // 6 frames in a single row
-    const rows = 1; // Only 1 row
-
-    // size of each frame
-    final frameW = imgRun.width / cols;
-    final frameH = imgRun.height / rows;
-
-    final jumpW = imgJump.width / 4;
-    final jumpH = imgJump.height.toDouble();
-
-    _jumpData = SpriteAnimationData.sequenced(
-      amount: 4,
-      stepTime: 0.10,
-      textureSize: Vector2(jumpW, jumpH),
-      loop: false,
-    );
-
-    // Use SpriteAnimation.fromFrameData for more efficient sprite sheet handling
-    // This automatically extracts frames from the sheet
-    animation = SpriteAnimation.fromFrameData(
-      imgRun,
+    _runAnimation = await game.loadSpriteAnimation(
+      'sprites/anim/dino_run.png',
       SpriteAnimationData.sequenced(
-        amount: 6, // 6 frames
-        stepTime: 0.08,
-        textureSize: Vector2(frameW, frameH),
-        loop: true,
+        amount: 8,
+        stepTime: 0.12, // Slightly slower for more realistic running
+        textureSize: Vector2(680, 472),
       ),
     );
+
+    _jumpAnimation = await game.loadSpriteAnimation(
+      'sprites/anim/dino_jump.png',
+      SpriteAnimationData.sequenced(
+        amount: 12,
+        amountPerRow: 3,
+        stepTime: 0.1, // Slightly slower for more realistic jump sequence
+        textureSize: Vector2(680, 472),
+        loop: false, // Jump animation should not loop
+      ),
+    );
+
+    animation = _runAnimation;
 
     size = Vector2(GameConfig.playerWidth, GameConfig.playerHeight);
     anchor = Anchor.center;
 
-    // Add hitbox for collisions (configurable visibility)
+    // Add hitBox for collisions (configurable visibility)
     add(
       RectangleHitbox()
         ..collisionType = CollisionType.active
@@ -74,18 +63,24 @@ class Player extends SpriteAnimationComponent
       y = groundY;
       velocity.y = 0;
       isOnGround = true;
+
+      // Switch to running animation when on ground
+      if (animation != _runAnimation) {
+        animation = _runAnimation;
+      }
     } else {
       isOnGround = false;
+
+      // Switch to jump animation when in air
+      if (animation != _jumpAnimation) {
+        animation = _jumpAnimation;
+      }
     }
   }
 
   void jump({bool stronger = false}) {
     if (isOnGround) {
       velocity.y = stronger ? -GameConfig.highJumpForce : -GameConfig.jumpForce;
-      animation = SpriteAnimation.fromFrameData(
-        game.images.fromCache('sprites/dash_jump.png'),
-        _jumpData,
-      );
     }
   }
 

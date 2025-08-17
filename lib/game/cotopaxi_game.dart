@@ -48,7 +48,6 @@ class CotopaxiGame extends FlameGame
 
     // Preload all images that will be used
     await images.loadAll([
-      'sprites/dash_run.png',
       'sprites/dash_jump.png',
       'sprites/llama.png',
       'sprites/roca.png',
