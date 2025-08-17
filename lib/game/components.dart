@@ -37,12 +37,27 @@ class Hud extends PositionComponent with HasGameReference<CotopaxiGame> {
   int combo = 0;
   double timeLeft = 60;
   String? _message;
+  bool _showControlsHint = true;
+  double _controlsHintTimer = 0;
 
   Hud({required CotopaxiGame game}) {
     this.game = game;
   }
 
   void setMessage(String? m) => _message = m;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    // Hide controls hint after 5 seconds of gameplay
+    if (_showControlsHint && game.state == PlayState.running) {
+      _controlsHintTimer += dt;
+      if (_controlsHintTimer > 5.0) {
+        _showControlsHint = false;
+      }
+    }
+  }
 
   @override
   void render(Canvas canvas) {
@@ -101,6 +116,44 @@ class Hud extends PositionComponent with HasGameReference<CotopaxiGame> {
         game.size.y / 2 - 10,
         GameConfig.messageFontSize,
         color: Colors.black54,
+      );
+    }
+
+    // Show physical controls hint for Android gaming consoles
+    if (_showControlsHint && GameConfig.enableKeyboardControls) {
+      const controlsY = 80.0;
+
+      tp(
+        GameStrings.physicalControlsSupported,
+        GameConfig.hudPadding,
+        controlsY,
+        14,
+        color: Colors.blue.shade700,
+        weight: FontWeight.w600,
+      );
+
+      tp(
+        GameStrings.normalJumpControls,
+        GameConfig.hudPadding,
+        controlsY + 20,
+        12,
+        color: Colors.black87,
+      );
+
+      tp(
+        GameStrings.highJumpControls,
+        GameConfig.hudPadding,
+        controlsY + 35,
+        12,
+        color: Colors.black87,
+      );
+
+      tp(
+        GameStrings.alternativeControls,
+        GameConfig.hudPadding,
+        controlsY + 50,
+        11,
+        color: Colors.grey.shade600,
       );
     }
   }

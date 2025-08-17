@@ -10,9 +10,15 @@ class GameConfig {
   static const double playerHeight = 96.0;
   static const double jumpForce = 620.0;
   static const double highJumpForce = 720.0;
+  static const double doubleJumpForce =
+      500.0; // pixels per second - slightly less than normal jump
+  static const int maxJumps =
+      2; // Maximum number of jumps (1 = single jump, 2 = double jump)
+  static const double invulnerabilityDuration =
+      1.5; // seconds - prevents multiple hits
 
   // Ground settings
-  static const double groundHeight = 120.0;
+  static const double groundHeight = 80.0;
 
   // Spawn settings
   static const double spawnInterval =
@@ -39,6 +45,18 @@ class GameConfig {
   static const double scoreFontSize = 24.0;
   static const double comboFontSize = 16.0;
 
+  // Input settings
+  static const bool enableKeyboardControls = true; // Keyboard support
+  static const bool enableGamepadControls = true; // Gamepad/controller support
+
+  // Vibration settings
+  static const bool enableVibration = true; // Enable haptic feedback
+  static const int collisionVibrationDuration =
+      800; // milliseconds - stronger vibration on collision
+  static const int strongVibrationDuration =
+      1000; // milliseconds - very strong vibration for game over
+
   // Debug settings
   static const bool showHitBoxes = false; // Set to true to see collision boxes
+  static const bool debugKeyboardInput = true; // Show keyboard input debug info
 }

@@ -44,8 +44,21 @@ class GameStrings {
   // Tutorial messages
   static const String tapToJump = 'Tap to jump';
   static const String doubleTapForHighJump = 'Double tap for high jump';
+  static const String doubleJumpTip = 'Press jump twice for double jump!';
+  static const String vibrationTip = 'Feel the impact with haptic feedback!';
   static const String avoidObstacles = 'Avoid obstacles';
   static const String collectItems = 'Collect items for points';
+
+  // Physical controls instructions
+  static const String keyboardControlsTitle = 'Keyboard Controls';
+  static const String gamepadControlsTitle = 'Gaming Console Controls';
+  static const String normalJumpControls =
+      'Jump/Double Jump: Game Button A, Arrow Up ↑';
+  static const String highJumpControls = 'Move: Arrow Left ←, Arrow Right →';
+  static const String alternativeControls =
+      'Use arrows to move and jump around!';
+  static const String physicalControlsSupported =
+      '🎮 Console Controls: B, ↑←→ 🎮';
 
   // Settings and options
   static const String settingsTitle = 'Settings';
