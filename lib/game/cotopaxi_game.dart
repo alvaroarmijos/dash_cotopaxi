@@ -42,6 +42,7 @@ class CotopaxiGame extends FlameGame
 
   // Callbacks
   GameOverCallback? onGameOver;
+  Function(int score, int combo)? onVictory;
 
   @override
   Color backgroundColor() => const Color(0xFFB3E5FC); // sky
@@ -126,7 +127,15 @@ class CotopaxiGame extends FlameGame
     spawner.interval = GameUtils.calculateSpawnInterval(elapsed);
     spawner.update(dt);
 
-    if (hud.timeLeft <= 0 || lives <= 0) {
+    // Check for victory (survive 60 seconds)
+    if (hud.timeLeft <= 0 && lives > 0) {
+      state = PlayState.victory;
+      onVictory?.call(score, combo);
+      return;
+    }
+
+    // Check for game over
+    if (lives <= 0) {
       state = PlayState.gameOver;
       onGameOver?.call(
         GameResult(score: score, lives: lives, timeSurvived: elapsed),

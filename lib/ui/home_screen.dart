@@ -36,52 +36,167 @@ class _HomeScreenState extends State<HomeScreen> {
       child: PopScope(
         canPop: false,
         child: Scaffold(
-          body: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 24),
-                      Text(
-                        GameStrings.appTitle,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        GameStrings.appDescription,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: 240,
-                        height: 56,
-                        child: FilledButton(
-                          onPressed: () => _startGame(context),
-                          child: const Text(GameStrings.playButton),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _stat(GameStrings.lastScoreLabel, lastScore),
-                          const SizedBox(width: 24),
-                          _stat(GameStrings.bestScoreLabel, bestScore),
-                        ],
-                      ),
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              // Animated background
+              AnimatedContainer(
+                duration: const Duration(seconds: 3),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF1A237E), // Deep Blue
+                      Color(0xFF0D47A1), // Material Blue
+                      Color(0xFF0277BD), // Light Blue
+                      Color(0xFF01579B), // Dark Blue
                     ],
                   ),
                 ),
               ),
-            ),
+
+              // Flutter logo pattern overlay
+              Positioned.fill(
+                child: CustomPaint(painter: _FlutterPatternPainter()),
+              ),
+
+              // Main content
+              SafeArea(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Flutter logo icon
+                          const Icon(
+                            Icons.flutter_dash,
+                            size: 75,
+                            color: Color(0xFF00D4FF), // Flutter blue
+                            shadows: [
+                              Shadow(
+                                color: Color(0xFF00D4FF),
+                                blurRadius: 20,
+                                offset: Offset(0, 0),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // App title
+                          Text(
+                            GameStrings.appTitle,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF00D4FF), // Flutter blue
+                              letterSpacing: 2.0,
+                              shadows: [
+                                const Shadow(
+                                  color: Colors.white,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 0),
+                                ),
+                                const Shadow(
+                                  color: Color(0xFF00D4FF),
+                                  blurRadius: 25,
+                                  offset: Offset(0, 0),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // App description
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Text(
+                              GameStrings.appDescription,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFFB3E5FC), // Light blue
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Play button
+                          SizedBox(
+                            width: 260,
+                            child: ElevatedButton(
+                              onPressed: () => _startGame(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF00D4FF),
+                                foregroundColor: Colors.white,
+                                elevation: 12,
+                                shadowColor: const Color(
+                                  0xFF00D4FF,
+                                ).withValues(alpha: 0.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(32),
+                                ),
+                              ),
+                              child: Text(
+                                GameStrings.playButton,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          // Stats section
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF00D4FF,
+                              ).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(
+                                  0xFF00D4FF,
+                                ).withValues(alpha: 0.3),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF00D4FF,
+                                  ).withValues(alpha: 0.2),
+                                  blurRadius: 15,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _stat(GameStrings.lastScoreLabel, lastScore),
+                                const SizedBox(width: 32),
+                                _stat(GameStrings.bestScoreLabel, bestScore),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -103,9 +218,45 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _stat(String label, int value) => Column(
     children: [
-      Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-      const SizedBox(height: 4),
-      Text('$value', style: const TextStyle(fontSize: 20)),
+      Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFFB3E5FC), // Light blue
+          fontSize: 16,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        '$value',
+        style: GoogleFonts.poppins(
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF00D4FF), // Flutter blue
+        ),
+      ),
     ],
   );
+}
+
+/// Geometric pattern painter
+class _FlutterPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.03)
+      ..style = PaintingStyle.fill;
+
+    // Draw subtle Flutter-style geometric patterns
+    for (int i = 0; i < 25; i++) {
+      final x = (i * 60.0) % size.width;
+      final y = (i * 50.0) % size.height;
+
+      // Draw small circles in a grid pattern
+      canvas.drawCircle(Offset(x, y), 10.0, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

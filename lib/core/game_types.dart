@@ -1,5 +1,5 @@
 /// Game state enumeration
-enum PlayState { idle, countdown, running, gameOver }
+enum PlayState { idle, countdown, running, victory, gameOver }
 
 /// Obstacle types
 enum ObstacleType { llama, roca, charco }

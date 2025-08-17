@@ -40,6 +40,14 @@ class GameStrings {
   static const String successTitle = 'Success';
   static const String levelUpMessage = 'Level Up!';
   static const String newRecordMessage = 'New Record!';
+  static const String victoryTitle = 'VICTORY!';
+  static const String victoryMessage = 'You have completed the game!';
+  static const String victorySubtitle =
+      'Congratulations, you are a true champion!';
+  static const String victoryPlayAgainButton = 'Play Again';
+  static const String victoryBackToMenuButton = 'Main Menu';
+  static const String victoryFinalScoreLabel = 'Final Score';
+  static const String victoryMaxComboLabel = 'Max Combo';
 
   // Tutorial messages
   static const String tapToJump = 'Tap to jump';

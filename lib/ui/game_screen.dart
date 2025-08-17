@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../core/game_strings.dart';
 import '../game/cotopaxi_game.dart';
+import 'victory_screen.dart';
 
 /// Game screen that contains the Flame game
 class GameScreen extends StatefulWidget {
@@ -25,6 +26,14 @@ class _GameScreenState extends State<GameScreen> {
 
     _game.onGameOver = (result) {
       Navigator.of(context).pop(result.score);
+    };
+
+    _game.onVictory = (score, combo) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => VictoryScreen(finalScore: score, finalCombo: combo),
+        ),
+      );
     };
   }
 
