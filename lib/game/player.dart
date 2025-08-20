@@ -32,22 +32,24 @@ class Player extends SpriteAnimationComponent
 
   @override
   Future<void> onLoad() async {
+    /// Dash run sprite
     _runAnimation = await game.loadSpriteAnimation(
-      'sprites/anim/dino_run.png',
+      'sprites/anim/dash_run.png',
       SpriteAnimationData.sequenced(
-        amount: 8,
-        stepTime: 0.12, // Slightly slower for more realistic running
-        textureSize: Vector2(680, 472),
+        amount: 16,
+        amountPerRow: 4,
+        stepTime: 0.1, // Slightly slower for more realistic running
+        textureSize: Vector2(240, 255),
       ),
     );
 
     _jumpAnimation = await game.loadSpriteAnimation(
-      'sprites/anim/dino_jump.png',
+      'sprites/anim/dash_jump.png',
       SpriteAnimationData.sequenced(
-        amount: 12,
-        amountPerRow: 3,
+        amount: 16,
+        amountPerRow: 4,
         stepTime: 0.1, // Slightly slower for more realistic jump sequence
-        textureSize: Vector2(680, 472),
+        textureSize: Vector2(252, 256),
         loop: false, // Jump animation should not loop
       ),
     );
@@ -58,17 +60,17 @@ class Player extends SpriteAnimationComponent
     anchor = Anchor.center;
 
     // Add custom hitBox for collisions (compensating for image padding)
-    // The actual dinosaur is smaller than the full sprite size and positioned more to the left
+    // The actual dash is smaller than the full sprite size and positioned more to the left
     add(
       RectangleHitbox(
           size: Vector2(
-            GameConfig.playerWidth * 0.3,
+            GameConfig.playerWidth * 0.4,
             GameConfig.playerHeight * 0.7,
           ), // Smaller hitbox
           position: Vector2(
-            GameConfig.playerWidth * 0.1,
+            GameConfig.playerWidth * 0.3,
             GameConfig.playerHeight * 0.1,
-          ), // Offset to match visual dino position
+          ), // Offset to match visual position
         )
         ..collisionType = CollisionType.active
         ..renderShape = GameConfig.showHitBoxes,

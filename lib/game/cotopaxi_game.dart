@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/parallax.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../core/game_config.dart';
@@ -20,14 +22,12 @@ class CotopaxiGame extends FlameGame
         HasCollisionDetection,
         TapDetector,
         DoubleTapDetector,
-        PanDetector,
         HasGameReference {
   // Game components
   late Player player;
   late Ground ground;
   late Hud hud;
   late SpawnManager spawner;
-  late ParallaxComponent parallax;
 
   // Game state
   PlayState state = PlayState.idle;
@@ -66,21 +66,36 @@ class CotopaxiGame extends FlameGame
       'parallax/bg_1_clouds.png',
       'parallax/bg_2_cotopaxi.png',
       'parallax/bg_3_fields.png',
+      'parallax/bg_4_condor.png',
     ]);
 
     // Load Parallax background with seamless tiling
-    parallax = await ParallaxComponent.load(
+    final parallax1 = await ParallaxComponent.load(
       [
         ParallaxImageData("parallax/bg_0_sky.png"),
         ParallaxImageData("parallax/bg_1_clouds.png"),
-        ParallaxImageData("parallax/bg_2_cotopaxi.png"),
-        ParallaxImageData("parallax/bg_3_fields.png"),
       ],
       baseVelocity: Vector2(30, 0),
       velocityMultiplierDelta: Vector2(1.1, 0),
     );
 
-    add(parallax);
+    add(parallax1);
+
+    // Load Parallax background with seamless tiling
+    final parallax2 = await ParallaxComponent.load([
+      ParallaxImageData("parallax/bg_2_cotopaxi.png"),
+    ], repeat: ImageRepeat.noRepeat);
+
+    add(parallax2);
+
+    // Load Parallax background with seamless tiling
+    final parallax3 = await ParallaxComponent.load(
+      [ParallaxImageData("parallax/bg_3_fields.png")],
+      baseVelocity: Vector2(30, 0),
+      velocityMultiplierDelta: Vector2(1.1, 0),
+    );
+
+    add(parallax3);
 
     // Add ground
     ground = Ground(height: GameConfig.groundHeight);
@@ -90,7 +105,7 @@ class CotopaxiGame extends FlameGame
     player = Player()
       ..position = Vector2(
         120,
-        size.y - ground.height - GameConfig.playerHeight,
+        size.y - ground.height - GameConfig.playerHeight + 30,
       );
     add(player);
 
@@ -102,6 +117,19 @@ class CotopaxiGame extends FlameGame
     spawner = SpawnManager(onSpawn: (component) => add(component));
     add(spawner);
 
+    // Load Parallax background with seamless tiling
+    final parallax4 = await ParallaxComponent.load(
+      [ParallaxImageData("parallax/bg_4_condor.png")],
+      baseVelocity: Vector2(10, 0),
+      size: Vector2(50, 50),
+      velocityMultiplierDelta: Vector2(0.5, 0),
+      repeat: ImageRepeat.noRepeat,
+      fill: LayerFill.width,
+      position: Vector2(0, 120),
+    );
+
+    add(parallax4);
+
     startCountdown();
   }
 
@@ -110,6 +138,13 @@ class CotopaxiGame extends FlameGame
     await Future<void>.delayed(const Duration(milliseconds: 800));
     state = PlayState.running;
     hud.setMessage(GameStrings.gameStartMessage);
+
+    // Hide the start message after 2 seconds
+    Future.delayed(const Duration(seconds: 2), () {
+      if (state == PlayState.running) {
+        hud.setMessage(null);
+      }
+    });
   }
 
   @override
@@ -153,21 +188,6 @@ class CotopaxiGame extends FlameGame
   void onDoubleTap() {
     if (state != PlayState.running) return;
     player.jump(stronger: true);
-  }
-
-  @override
-  void onPanStart(DragStartInfo info) {
-    // Sliding functionality removed
-  }
-
-  @override
-  void onPanUpdate(DragUpdateInfo info) {
-    // Sliding functionality removed
-  }
-
-  @override
-  void onPanEnd(DragEndInfo info) {
-    // Sliding functionality removed
   }
 
   void addScore(int points) {

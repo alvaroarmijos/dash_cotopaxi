@@ -229,7 +229,7 @@ class Obstacle extends SpriteComponent
     o.sprite = Sprite(game.images.fromCache(path));
     o.position = Vector2(
       game.size.x + 10,
-      game.size.y - game.ground.height - o.height - 6,
+      game.size.y - game.ground.height - o.height + 2,
     );
     o.speed = GameUtils.calculateObstacleSpeed(game.elapsed);
     o.add(

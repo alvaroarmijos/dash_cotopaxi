@@ -18,7 +18,7 @@ class GameConfig {
       1.5; // seconds - prevents multiple hits
 
   // Ground settings
-  static const double groundHeight = 80.0;
+  static const double groundHeight = 95.0;
 
   // Spawn settings
   static const double spawnInterval =
