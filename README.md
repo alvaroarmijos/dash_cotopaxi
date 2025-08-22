@@ -2,6 +2,18 @@
 
 An endless runner game developed in Flutter + Flame where you control Dash running through Cotopaxi, avoiding obstacles and collecting cacao and roses.
 
+
+
+## 🎬 Demo Video
+
+https://github.com/user-attachments/assets/fddcf511-613e-4530-b392-2a1e995aeb53
+
+*Watch the game in action! See Dash running through the beautiful Cotopaxi landscape, avoiding obstacles and collecting items.*
+
+
+
+
+
 ## 🎮 Game Features
 
 - **Genre**: Endless runner with time limit (60 seconds)
