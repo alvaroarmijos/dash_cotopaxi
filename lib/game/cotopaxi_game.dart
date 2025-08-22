@@ -12,6 +12,7 @@ import '../core/game_config.dart';
 import '../core/game_strings.dart';
 import '../core/game_types.dart';
 import '../core/game_utils.dart';
+import '../core/score_service.dart';
 import '../core/vibration_service.dart';
 import 'components.dart';
 import 'player.dart';
@@ -165,6 +166,8 @@ class CotopaxiGame extends FlameGame
     // Check for victory (survive 60 seconds)
     if (hud.timeLeft <= 0 && lives > 0) {
       state = PlayState.victory;
+      // Save last score when winning
+      ScoreService.instance.saveLastScore(score, combo);
       onVictory?.call(score, combo);
       return;
     }
@@ -172,6 +175,8 @@ class CotopaxiGame extends FlameGame
     // Check for game over
     if (lives <= 0) {
       state = PlayState.gameOver;
+      // Save last score when losing
+      ScoreService.instance.saveLastScore(score, combo);
       onGameOver?.call(
         GameResult(score: score, lives: lives, timeSurvived: elapsed),
       );
@@ -278,6 +283,13 @@ class CotopaxiGame extends FlameGame
         isMovingRight = false;
         player.stopMovement();
         break;
+    }
+  }
+
+  /// Save current score and combo (useful for saving progress when exiting)
+  void saveCurrentScore() {
+    if (state == PlayState.running) {
+      ScoreService.instance.saveLastScore(score, combo);
     }
   }
 }

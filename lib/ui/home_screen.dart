@@ -1,10 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/game_strings.dart';
+import '../core/score_service.dart';
 import 'game_screen.dart';
 
 /// Home screen with game title and play button
@@ -18,6 +17,34 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int lastScore = 0;
   int bestScore = 0;
+  int bestCombo = 0;
+  int gamesPlayed = 0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  /// Load statistics from persistent storage
+  Future<void> _loadStats() async {
+    try {
+      final stats = await ScoreService.instance.getAllStats();
+      setState(() {
+        lastScore = stats['lastScore'] ?? 0;
+        bestScore = stats['bestScore'] ?? 0;
+        bestCombo = stats['bestCombo'] ?? 0;
+        gamesPlayed = stats['gamesPlayed'] ?? 0;
+        isLoading = false;
+      });
+    } catch (e) {
+      // If there's an error, just set loading to false
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 600),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
+                    child: SingleChildScrollView(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -155,11 +181,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 20),
 
                           // Stats section
                           Container(
-                            padding: const EdgeInsets.all(24),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: const Color(
                                 0xFF00D4FF,
@@ -181,14 +207,47 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _stat(GameStrings.lastScoreLabel, lastScore),
-                                const SizedBox(width: 32),
-                                _stat(GameStrings.bestScoreLabel, bestScore),
-                              ],
-                            ),
+                            child: isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Color(0xFF00D4FF),
+                                  )
+                                : Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          _stat(
+                                            GameStrings.lastScoreLabel,
+                                            lastScore,
+                                          ),
+                                          if (bestCombo > 0)
+                                            _stat(
+                                              GameStrings.bestComboRecordLabel,
+                                              bestCombo,
+                                            ),
+                                        ],
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          _stat(
+                                            GameStrings.bestScoreLabel,
+                                            bestScore,
+                                          ),
+
+                                          if (gamesPlayed > 0)
+                                            _stat(
+                                              GameStrings.gamesPlayedLabel,
+                                              gamesPlayed,
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ],
                       ),
@@ -209,10 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
     ).push<int>(MaterialPageRoute(builder: (_) => const GameScreen()));
     if (score != null) {
-      setState(() {
-        lastScore = score;
-        bestScore = max(bestScore, score);
-      });
+      // Reload stats after game to show updated values
+      await _loadStats();
     }
   }
 

@@ -25,10 +25,16 @@ class _GameScreenState extends State<GameScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     _game.onGameOver = (result) {
-      Navigator.of(context).pop(result.score);
+      // Save last score when game over
+      _game.saveCurrentScore();
+      Future.delayed(Durations.short4, () {
+        Navigator.of(context).pop(result.score);
+      });
     };
 
     _game.onVictory = (score, combo) {
+      // Save last score when victory
+      _game.saveCurrentScore();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => VictoryScreen(finalScore: score, finalCombo: combo),
