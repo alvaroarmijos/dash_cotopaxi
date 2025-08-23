@@ -1,7 +1,7 @@
 /// Game configuration constants
 class GameConfig {
   // Game settings
-  static const double gameDuration = 30.0; // seconds
+  static const double gameDuration = 60.0; // seconds
   static const double gravity = 1600.0; // px/s^2
   static const double baseSpeed = 320.0; // px/s
 

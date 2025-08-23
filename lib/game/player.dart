@@ -27,6 +27,10 @@ class Player extends SpriteAnimationComponent
   bool isInvulnerable = false;
   double invulnerabilityTimer = 0.0;
 
+  // Scaling constants
+  static const double normalScale = 1.0;
+  static const double jumpScale = 1.3;
+
   late SpriteAnimation _runAnimation;
   late SpriteAnimation _jumpAnimation;
 
@@ -49,7 +53,7 @@ class Player extends SpriteAnimationComponent
         amount: 16,
         amountPerRow: 4,
         stepTime: 0.1, // Slightly slower for more realistic jump sequence
-        textureSize: Vector2(252, 256),
+        textureSize: Vector2(290, 420),
         loop: false, // Jump animation should not loop
       ),
     );
@@ -127,12 +131,22 @@ class Player extends SpriteAnimationComponent
       if (animation != _runAnimation) {
         animation = _runAnimation;
       }
+
+      // Restore normal scale when running
+      if (scale.x != normalScale) {
+        scale.setAll(normalScale);
+      }
     } else {
       isOnGround = false;
 
       // Switch to jump animation when in air
       if (animation != _jumpAnimation) {
         animation = _jumpAnimation;
+      }
+
+      // Apply jump scale when in air
+      if (scale.x != jumpScale) {
+        scale.setAll(jumpScale);
       }
     }
   }
